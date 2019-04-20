@@ -4,7 +4,7 @@
 #include <SoftwareSerial.h>
 
 File myFile;
-SoftwareSerial radioSerial(9, 1); //Vcc - 5V, Gng - gnd, Txd - 9, Rxd - Txd
+SoftwareSerial radioSerial(9, 10); //Vcc - 5V, Gng - gnd, Txd - 9, Rxd - Txd
 JsonObject& root = StaticJsonBuffer<200>().createObject(); // Creating JSON object
 
 void setup() {
@@ -18,16 +18,16 @@ void setup() {
   Serial.println("initialization done.");
 
 
-//  if (myFile) {
-//    Serial.print("Writing to test.txt...");
-//    myFile.println("testing 1, 2, 3.");
-//    // close the file:
-//    myFile.close();
-//    Serial.println("done.");
-//  } else {
-//    // if the file didn't open, print an error:
-//    Serial.println("error opening test.txt");
-//  }
+  //  if (myFile) {
+  //    Serial.print("Writing to test.txt...");
+  //    myFile.println("testing 1, 2, 3.");
+  //    // close the file:
+  //    myFile.close();
+  //    Serial.println("done.");
+  //  } else {
+  //    // if the file didn't open, print an error:
+  //    Serial.println("error opening test.txt");
+  //  }
 }
 
 // This func will freeze arduino till data comes into it
@@ -39,14 +39,16 @@ JsonObject& wait_for_data() {
   while (radioSerial.available()) {
     data += radioSerial.readString();
   }
-  JsonObject& jsonData = DynamicJsonBuffer().parseObject(data);
+  DynamicJsonBuffer dynamicJsonBuffer;
+  JsonObject& jsonData = dynamicJsonBuffer.parseObject(data);
   return jsonData;
 }
 
 void loop() {
   // put your main code here, to run repeatedly:
-  wait_for_data().prettyPrintTo(Serial); 
-  myFile = SD.open("jej.txt", FILE_WRITE);
-  wait_for_data().prettyPrintTo(myFile); 
+  JsonObject& danniye = wait_for_data();
+  danniye.prettyPrintTo(Serial);
+  myFile = SD.open("telemetry.txt", FILE_WRITE);
+  danniye.prettyPrintTo(myFile);
   myFile.close();
 }
